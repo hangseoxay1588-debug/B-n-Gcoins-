@@ -1,1 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HANG SEO XAY</title>
+<style>
+body{margin:0;font-family:Arial;background:#111;color:#fff}
+.app{max-width:420px;margin:auto;background:#1b1b1b;min-height:100vh}
+.header{background:#000;padding:15px;text-align:center}
+.header h2{color:#facc15;margin:0}
+.page{padding:15px}
+.card{background:#222;padding:12px;border-radius:12px;margin:8px 0}
+input,select{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px}
+button{width:100%;padding:12px;background:#facc15;border:none;border-radius:8px;font-weight:bold}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:420px;width:100%;display:flex;background:#000}
+.nav button{flex:1;background:none;color:#fff;padding:14px}
+img{width:100%;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+<h2>HANG SEO XAY</h2>
+<p>SHOP GCOINS BUILDA</p>
+</div>
 
+<div id="page" class="page"></div>
+
+<div class="nav" id="nav" style="display:none">
+<button onclick="home()">🏠</button>
+<button onclick="historyPage()">📜</button>
+<button onclick="account()">👤</button>
+</div>
+</div>
+
+<script>
+let users=[{u:"admin",p:"xay12345!",admin:true}];
+let current=null;
+let orders=[];
+
+function login(){
+page.innerHTML=`
+<h3>Đăng nhập</h3>
+<input id=u placeholder="Tài khoản">
+<input id=p type=password placeholder="Mật khẩu">
+<button onclick="doLogin()">Đăng nhập</button>
+<button onclick="register()">Đăng ký</button>`;
+}
+
+function register(){
+page.innerHTML=`
+<h3>Đăng ký</h3>
+<input id=ru placeholder="Tài khoản">
+<input id=rp type=password placeholder="Mật khẩu">
+<button onclick="saveUser()">Tạo tài khoản</button>`;
+}
+
+function saveUser(){
+users.push({u:ru.value,p:rp.value,admin:false});
+alert("Đăng ký thành công");
+login();
+}
+
+function doLogin(){
+let x=users.find(a=>a.u==u.value&&a.p==p.value);
+if(!x)return alert("Sai tài khoản");
+current=x;
+nav.style.display="flex";
+home();
+}
+
+function home(){
+page.innerHTML=`
+<div class=card>
+<h3>Bảng giá GCOINS</h3>
+<p>10K ➜ 15K</p>
+<p>20K ➜ 30K</p>
+<p>50K ➜ 70K</p>
+<p>100K ➜ 140K</p>
+</div>
+<button onclick="buy()">MUA GCOINS</button>
+${current.admin?'<button onclick="adminPage()">QUẢN LÝ ĐƠN</button>':''}`;
+}
+
+function buy(){
+page.innerHTML=`
+<h3>Mua GCOINS</h3>
+<input id=idgame placeholder="ID Game">
+<select id=pack>
+<option>10K ➜ 15K</option>
+<option>20K ➜ 30K</option>
+<option>50K ➜ 70K</option>
+<option>100K ➜ 140K</option>
+</select>
+
+<select id=pay onchange="payBox()">
+<option>QR Chuyển khoản</option>
+<option>Garena</option>
+<option>Zing</option>
+<option>Viettel</option>
+<option>Vinaphone</option>
+<option>Mobifone</option>
+<option>Vcoin</option>
+<option>SCOIN</option>
+</select>
+
+<div id=box class=card>
+<img src="qr.jpg">
+<p>ZaloPay</p>
+<p>0335038716</p>
+<p>HANG SEO XAY</p>
+</div>
+
+<button onclick="sendOrder()">Gửi đơn</button>`;
+}
+
+function payBox(){
+if(pay.value=="QR Chuyển khoản"){
+box.innerHTML=`<img src="qr.jpg"><p>ZaloPay</p><p>0335038716</p><p>HANG SEO XAY</p>`;
+}else{
+box.innerHTML=`<input placeholder="Số seri"><input placeholder="Mã thẻ">`;
+}
+}
+
+function sendOrder(){
+orders.unshift({
+user:current.u,
+id:idgame.value,
+pack:pack.value,
+pay:pay.value,
+status:"Chờ xử lý"
+});
+historyPage();
+}
+
+function historyPage(){
+let list=current.admin?orders:orders.filter(a=>a.user==current.u);
+page.innerHTML="<h3>Lịch sử</h3>";
+if(list.length==0){page.innerHTML+="Chưa có đơn";return;}
+list.forEach(o=>{
+page.innerHTML+=`
+<div class=card>
+<b>ID Game:</b> ${o.id}<br>
+${o.pack}<br>
+${o.pay}<br>
+🟡 ${o.status}
+</div>`;
+});
+}
+
+function account(){
+page.innerHTML=`
+<div class=card>
+<h3>${current.u}</h3>
+<p>${current.admin?"Quản trị viên":"Khách hàng"}</p>
+<p>Zalo:0335038716</p>
+</div>
+<button onclick="logout()">Đăng xuất</button>`;
+}
+
+function logout(){
+current=null;
+nav.style.display="none";
+login();
+}
+
+function adminPage(){
+page.innerHTML="<h3>Quản lý đơn</h3>";
+orders.forEach((o,i)=>{
+page.innerHTML+=`
+<div class=card>
+<b>${o.user}</b><br>
+ID:${o.id}<br>
+${o.pack}<br>
+${o.pay}<br>
+<button onclick="done(${i})">Hoàn thành</button>
+</div>`;
+});
+}
+
+function done(i){
+orders[i].status="Hoàn thành";
+adminPage();
+}
+
+login();
+</script>
+</body>
+</html>
